@@ -25,29 +25,31 @@ end
     @test @inferred(largecat(arrs, dims=dims)) == cat(arrs..., dims=dims)
 end
 
-@testset "largecat perf " begin
-    function printrow(n, rel_time, tot_time, mem, outsize)
-        println("|",
-          rpad(string(n   ), 10), "|",
-          rpad(string(rel_time), 15), "|",
-          rpad(string(tot_time), 15), "|",
-          rpad(string(mem), 15), "|",
-          rpad(string(outsize), 15), "|",
-        )
-    end
-    println("Performance counters")
-    printrow("n arrays", "time/length/ns", "total time/s", "allocs/bytes", "outsize/bytes")
-
-    for n in Int[1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]
-        arrs = map(1:Int(n)) do i
-            rand(Float32, rand(1:3), 1)
+if VERSION >= v"1.5"
+    @testset "largecat perf " begin
+        function printrow(n, rel_time, tot_time, mem, outsize)
+            println("|",
+              rpad(string(n   ), 10), "|",
+              rpad(string(rel_time), 15), "|",
+              rpad(string(tot_time), 15), "|",
+              rpad(string(mem), 15), "|",
+              rpad(string(outsize), 15), "|",
+            )
         end
-        largecat(arrs[1:1],dims=(1,)) # warmup
-        stats = @timed largecat(arrs,dims=(1,))
-        outsize = Base.summarysize(stats.value)
-        rel_time = round(1e9*stats.time/length(stats.value), digits=3)
-        printrow(n,rel_time , stats.time, stats.bytes, outsize)
-        # @info "$(stats.time)s $(stats.bytes) bytes"
-        @test outsize < stats.bytes < outsize + 1000
+        println("Performance counters")
+        printrow("n arrays", "time/length/ns", "total time/s", "allocs/bytes", "outsize/bytes")
+
+        for n in Int[1, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6]
+            arrs = map(1:Int(n)) do i
+                rand(Float32, rand(1:3), 1)
+            end
+            largecat(arrs[1:1],dims=(1,)) # warmup
+            stats = @timed largecat(arrs,dims=(1,))
+            outsize = Base.summarysize(stats.value)
+            rel_time = round(1e9*stats.time/length(stats.value), digits=3)
+            printrow(n,rel_time , stats.time, stats.bytes, outsize)
+            # @info "$(stats.time)s $(stats.bytes) bytes"
+            @test outsize < stats.bytes < outsize + 1000
+        end
     end
 end
