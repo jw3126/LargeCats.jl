@@ -45,10 +45,18 @@ samearg(x1, x2) = (@assert x1 === x2; x1)
     out
 end
 
-function largecat(itr; dims)
+_allocate_largecat_output(T::Type{<:Number}, outsize) = zeros(T, outsize)
+_allocate_largecat_output(::Type{T}, outsize) where {T} = Array{T}(undef, outsize)
+
+function allocate_largecat_output(itr, dims)
     T = largecat_eltype(itr)
     outsize = largecat_outsize(itr, dims = dims)
-    out = zeros(T, outsize)
+    N = length(outsize)
+    _allocate_largecat_output(T, outsize)
+end
+
+function largecat(itr; dims)
+    out = allocate_largecat_output(itr, dims)
     largecat!(out, itr, dims = dims)
 end
 

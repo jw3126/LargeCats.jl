@@ -17,12 +17,26 @@ using Test
 
 end
 
+struct MyType
+    value
+end
+@testset "exotic eltype" begin
+    xs = [
+        [MyType(1), MyType("a")], [MyType(:a)]
+    ]
+    @inferred largecat(xs, dims=1)
+    @test largecat(xs, dims=1) == MyType[MyType(1), MyType("a"), MyType(:a)]
+end
+
 @testset "against cat" begin
     arr1 = randn(1, 2, 3)
     arr2 = randn(1, 2, 4)
     arrs = [arr1, arr2]
     dims = (2, 3)
-    @test @inferred(largecat(arrs, dims = dims)) == cat(arrs..., dims = dims)
+
+    arr = @inferred largecat(arrs, dims = dims)
+    @test eltype(arr) == Float64
+    @test largecat(arrs, dims = dims) == cat(arrs..., dims = dims)
 
     function rand_setup()
         T = rand([Int8, Int, Float32, Float64])
