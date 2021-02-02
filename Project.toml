@@ -1,7 +1,7 @@
 name = "LargeCats"
 uuid = "b3a289e5-772e-4ea4-b7ab-d2c67663bb01"
 authors = ["Jan Weidner <jw3126@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [compat]
 julia = "1.3"
